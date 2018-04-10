@@ -3,21 +3,19 @@ import ballerina/io;
 import ballerina/time;
 import ballerina/runtime;
 
-endpoint http:ServiceEndpoint listener {
-    port:9090
-};
+
 
 @http:ServiceConfig {
     basePath:"/quote"
 }
-service<http:Service> asyncInvoker bind listener {
+service<http:Service> asyncInvoker bind {} {
 
   @http:ResourceConfig {
       methods:["GET"],
       path:"/"
   }
   getQuote (endpoint caller, http:Request req) {
-    endpoint http:SimpleClientEndpoint nasdaqServiceEP {
+    endpoint http:SimpleClient nasdaqServiceEP {
         url:"http://localhost:9095"
     };
 
@@ -28,7 +26,7 @@ service<http:Service> asyncInvoker bind listener {
     // invocation that returns without waiting for response.
     future<http:Response | http:HttpConnectorError> f1
     = async nasdaqServiceEP
-            -> get("/nasdaq/quote/GOOG", {});
+            -> get("/nasdaq/quote/GOOG", new);
     io:println(" >> Invocation completed!"
                + " Proceed without blocking for a response.");
 
@@ -50,10 +48,10 @@ service<http:Service> asyncInvoker bind listener {
     io:println(" >> Response available! ");
     match response {
       http:Response resp => {
-          string responseStr =? resp.getStringPayload();
+          string responseStr = check resp.getStringPayload();
           io:println(" >> Response : "
                      + responseStr);
-          _ = caller -> forward(resp);
+          _ = caller -> respond(resp);
       }
       http:HttpConnectorError err => {
           io:println(err.message);
