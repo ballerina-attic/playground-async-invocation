@@ -5,7 +5,7 @@ import ballerina/runtime;
 @http:ServiceConfig {
     basePath:"/quote"
 }
-service<http:Service> asyncInvoker bind {} {
+service<http:Service> AsyncInvoker bind {} {
 
   @http:ResourceConfig {
       methods:["GET"],
