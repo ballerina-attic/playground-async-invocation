@@ -3,8 +3,6 @@ import ballerina/io;
 import ballerina/time;
 import ballerina/runtime;
 
-
-
 @http:ServiceConfig {
     basePath:"/quote"
 }
@@ -59,5 +57,3 @@ service<http:Service> asyncInvoker bind {} {
     }
   }
 }
-
-
