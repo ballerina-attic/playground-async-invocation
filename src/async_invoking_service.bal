@@ -18,7 +18,7 @@ service<http:Service> AsyncInvoker bind {} {
 
     io:println(" >> Invoking service asynchrnounsly...");
 
-    // 'async' allows you to invoke a function or client
+    // 'start' allows you to invoke a function or client
     // connector action asynchronously. This is a remote
     // invocation that returns without waiting for response.
     future<http:Response | http:HttpConnectorError> f1
@@ -27,19 +27,18 @@ service<http:Service> AsyncInvoker bind {} {
     io:println(" >> Invocation completed!"
       + " Proceed without blocking for a response.");
 
-    // Mimic the workload of the main worker with a loop
+    // Mimic the workload of the main worker with a loop.
     int i = 0;
     while (i < 3) {
-      io:println(" >> Do some work."
-                 + "... Step " + i);
+      io:println(" >> Do some work.... Step " + i);
       i = i + 1;
       runtime:sleepCurrentWorker(200);
     }
 
     io:println(" >> Check for response availability...");
 
-    // ‘await` blocks until the previously started
-    // async function returns.
+    // ‘await` blocks until the previously started async
+    // function returns.
     var response = await f1;
     io:println(" >> Response available! ");
     match response {
