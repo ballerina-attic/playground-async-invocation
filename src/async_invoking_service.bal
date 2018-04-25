@@ -27,7 +27,7 @@ service<http:Service> AsyncInvoker bind listener {
     // invocation that returns without waiting for response.
     future<http:Response | http:HttpConnectorError> f1
       = start nasdaqServiceEP
-            -> get("/nasdaq/quote/GOOG", request = req);
+            -> get("/nasdaq/quote/GOOG");
     io:println(" >> Invocation completed!"
       + " Proceed without blocking for a response.");
 
