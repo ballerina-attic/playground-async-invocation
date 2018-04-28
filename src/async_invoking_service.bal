@@ -25,7 +25,7 @@ service<http:Service> AsyncInvoker bind listener {
     // 'start' allows you to invoke a function or client
     // connector action asynchronously. This is a remote
     // invocation that returns without waiting for response.
-    future<http:Response | http:HttpConnectorError> f1
+    future<http:Response | error> f1
       = start nasdaqServiceEP
             -> get("/nasdaq/quote/GOOG");
     io:println(" >> Invocation completed!"
@@ -52,7 +52,7 @@ service<http:Service> AsyncInvoker bind listener {
                    + responseStr);
         _ = caller -> respond(resp);
       }
-      http:HttpConnectorError err => {
+      error err => {
         io:println(err.message);
       }
     }
