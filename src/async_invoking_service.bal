@@ -20,18 +20,15 @@ service<http:Service> AsyncInvoker bind listener {
       url:"http://localhost:9095"
     };
 
-    io:println(" >> Invoking service asynchrnounsly...");
+    io:println(" >> Invoking service asynchronously...");
 
-    // 'start' allows you to invoke a function or client
-    // connector action asynchronously. This is a remote
-    // invocation that returns without waiting for response.
-    future<http:Response | error> f1
-      = start nasdaqServiceEP
-            -> get("/nasdaq/quote/GOOG");
-    io:println(" >> Invocation completed!"
-      + " Proceed without blocking for a response.");
+    // 'start' invokes a function or action asynchronously. Returns
+    // a 'future' without waiting for response.
+    future<http:Response | error> f1 = 
+        start nasdaqServiceEP -> get("/nasdaq/quote/GOOG");
 
-    // Mimic the workload of the main worker with a loop.
+    io:println(" >> Invocation initiated!");
+
     int i = 0;
     while (i < 3) {
       io:println(" >> Do some work.... Step " + i);
@@ -39,17 +36,15 @@ service<http:Service> AsyncInvoker bind listener {
       runtime:sleep(200);
     }
 
-    io:println(" >> Check for response availability...");
+    io:println(" >> Checking for a response from the future...");
 
-    // ‘await` blocks until the previously started async
-    // function returns.
+    // 'await' blocks until the started async function returns
     var response = await f1;
-    io:println(" >> Response available! ");
+    io:println(" >> Response available!");
     match response {
       http:Response resp => {
         string responseStr = check resp.getTextPayload();
-        io:println(" >> Response : "
-                   + responseStr);
+        io:println(" >> Response : " + responseStr);
         _ = caller -> respond(resp);
       }
       error err => {
