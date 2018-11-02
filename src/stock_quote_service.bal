@@ -14,10 +14,8 @@ service<http:Service> time bind listener {
         path: "/GOOG",  methods: ["GET"]
     }
     sayHello (endpoint caller, http:Request request) {
-        http:Response response = new;
         string googQuote = "GOOG, Alphabet Inc., 1013.41";
         runtime:sleep(1000);
-        response.setTextPayload(googQuote);
-        _ = caller -> respond(response);
+        _ = caller -> respond(googQuote);
     }
 }
