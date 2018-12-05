@@ -1,55 +1,60 @@
 import ballerina/http;
-import ballerina/io;
+import ballerina/log;
 import ballerina/runtime;
 
-endpoint http:Listener listener {
-  port:9090
-};
+listener http:Listener ep = new(9090);
 
 @http:ServiceConfig {
     basePath:"/quote"
 }
-service<http:Service> AsyncInvoker bind listener {
+service AsyncInvoker on ep {
 
   @http:ResourceConfig {
       methods:["GET"],
       path:"/"
   }
-  getQuote (endpoint caller, http:Request req) {
-    endpoint http:Client nasdaqServiceEP {
-      url:"http://localhost:9095"
-    };
+  resource function getQuote(http:Caller caller, http:Request req) {
+    http:Client nasdaqServiceEP = new("http://localhost:9095");
 
-    io:println(" >> Invoking service asynchronously...");
+
+    log:printInfo(" >> Invoking service asynchronously...");
 
     // 'start' invokes a function or action asynchronously. Returns
     // a 'future' without waiting for response.
-    future<http:Response | error> f1 = 
-        start nasdaqServiceEP -> get("/nasdaq/quote/GOOG");
+    future<http:Response | error> f1 =
+      start nasdaqServiceEP->get("/nasdaq/quote/GOOG");
 
-    io:println(" >> Invocation initiated!");
+    log:printInfo(" >> Invocation initiated!");
 
     int i = 0;
     while (i < 3) {
-      io:println(" >> Do some work.... Step " + i);
+      log:printInfo(" >> Do some work.... Step " + i);
       i = i + 1;
       runtime:sleep(200);
     }
 
-    io:println(" >> Checking for a response from the future...");
+    log:printInfo(" >> Checking for a response from the future...");
 
     // 'await' blocks until the started async function returns
-    var response = await f1;
-    io:println(" >> Response available!");
-    match response {
-      http:Response resp => {
-        string responseStr = check resp.getTextPayload();
-        io:println(" >> Response : " + responseStr);
-        _ = caller -> respond(resp);
-      }
-      error err => {
-        io:println(err.message);
-      }
+    var response = wait f1;
+    log:printInfo(" >> Response available!");
+    if (response is http:Response) {
+        var payload = response.getTextPayload();
+        if (payload is string) {
+          log:printInfo(" >> Response : " + payload);
+          _ = caller->respond(response);
+        } else if (payload is error) {
+          sendErrorResponse(caller, payload);
+        }
+    } else if (response is error) {
+      sendErrorResponse(caller, response);
     }
   }
+}
+
+function sendErrorResponse(http:Caller caller, error err) {
+  http:Response res= new;
+  res.statusCode = 500;
+  res.setPayload(untaint string.convert(err.detail().message));
+  _ = caller->respond(res);
 }
