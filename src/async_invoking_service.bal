@@ -36,7 +36,7 @@ service AsyncInvoker on ep {
 
     log:printInfo(" >> Checking for a response from the future...");
 
-    // 'await' blocks until the started async function returns
+    // 'wait' blocks until the started async function returns
     var response = wait f1;
     log:printInfo(" >> Response available!");
 
