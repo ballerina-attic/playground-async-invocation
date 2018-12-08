@@ -39,6 +39,7 @@ service AsyncInvoker on ep {
     // 'await' blocks until the started async function returns
     var response = wait f1;
     log:printInfo(" >> Response available!");
+
     if (response is http:Response) {
 
       string payload = check response.getTextPayload();
