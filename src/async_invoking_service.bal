@@ -13,7 +13,8 @@ service AsyncInvoker on ep {
       methods:["GET"],
       path:"/"
   }
-  resource function getQuote(http:Caller caller, http:Request req) {
+  resource function getQuote(http:Caller caller, http:Request req)
+                                                    returns error? {
     http:Client nasdaqServiceEP = new("http://localhost:9095");
 
 
@@ -35,26 +36,24 @@ service AsyncInvoker on ep {
 
     log:printInfo(" >> Checking for a response from the future...");
 
-    // 'await' blocks until the started async function returns
+    // 'wait' blocks until the started async function returns
     var response = wait f1;
     log:printInfo(" >> Response available!");
-    if (response is http:Response) {
-        var payload = response.getTextPayload();
-        if (payload is string) {
-          log:printInfo(" >> Response : " + payload);
-          _ = caller->respond(response);
-        } else if (payload is error) {
-          sendErrorResponse(caller, payload);
-        }
-    } else if (response is error) {
-      sendErrorResponse(caller, response);
-    }
-  }
-}
 
-function sendErrorResponse(http:Caller caller, error err) {
-  http:Response res= new;
-  res.statusCode = 500;
-  res.setPayload(untaint string.convert(err.detail().message));
-  _ = caller->respond(res);
+    if (response is http:Response) {
+
+      string payload = check response.getTextPayload();
+      log:printInfo(" >> Response : " + payload);
+      _ = caller->respond(response);
+
+    } else if (response is error) {
+
+      http:Response res= new;
+      res.statusCode = 500;
+      res.setPayload(untaint string.convert(response.detail().message));
+      _ = caller->respond(res);
+
+    }
+    return;
+  }
 }
