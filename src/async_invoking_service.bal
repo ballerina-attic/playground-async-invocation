@@ -14,7 +14,7 @@ service AsyncInvoker on ep {
       path:"/"
   }
   resource function getQuote(http:Caller caller, http:Request req)
-                                                    returns error? {
+                                                   returns error? {
     http:Client nasdaqServiceEP = new("http://localhost:9095");
 
 
