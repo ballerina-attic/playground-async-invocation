@@ -44,14 +44,15 @@ service AsyncInvoker on ep {
 
       string payload = check response.getTextPayload();
       log:printInfo(" >> Response : " + payload);
-      _ = caller->respond(response);
+      _ = check caller->respond(response);
 
-    } else if (response is error) {
+    } else {
 
       http:Response res= new;
       res.statusCode = 500;
-      res.setPayload(untaint string.convert(response.detail().message));
-      _ = caller->respond(res);
+      var errorPayload = check response.detail().message;
+      res.setPayload(untaint string.convert(errorPayload));
+      _ = check caller->respond(res);
 
     }
     return;
