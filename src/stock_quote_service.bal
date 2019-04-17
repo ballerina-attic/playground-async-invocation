@@ -12,7 +12,7 @@ service time on backendEP {
     @http:ResourceConfig{
         path: "/GOOG",  methods: ["GET"]
     }
-    resource function sayHello(http:Caller caller, http:Request request) returns error?{
+    resource function sayHello(http:Caller caller, http:Request request) returns error? {
         string googQuote = "GOOG, Alphabet Inc., 1013.41";
         runtime:sleep(1000);
         _ = check caller->respond(googQuote);
